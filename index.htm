@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>粵語語音治療故事發電機 - 🗣️</title>
+    <title>奇怪故事機 - 🗣️</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -58,10 +58,10 @@
     <!-- ヘッダーセクション -->
     <header class="w-full max-w-4xl text-center mb-4 mt-2">
         <h1 class="text-3xl md:text-4xl font-extrabold text-amber-900 tracking-tight drop-shadow-sm mb-1.5">
-            🗣️ 趣味故事發電機
+            🗣️ 奇怪故事機
         </h1>
         <p class="text-xs md:text-sm text-amber-800 font-medium max-w-xl mx-auto opacity-90 leading-relaxed px-2">
-            點擊骰子逐個揭曉，再次點擊右上角解鎖聲母類型，拼湊出一個天馬行空的故事吧！
+            點擊骰子逐個揭曉，拼湊出一個天馬行空的故事吧！
         </p>
     </header>
 
@@ -88,7 +88,7 @@
                     <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                     重新開始
                 </button>
-                <button onclick="revealAll()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-xs md:text-sm shadow transition-all duration-200">
+                <button id="btn-reveal-all" onclick="revealAll()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-xs md:text-sm shadow transition-all duration-200">
                     <i data-lucide="sparkles" class="w-4 h-4"></i>
                     全開！
                 </button>
@@ -104,82 +104,57 @@
 
     </main>
 
-    <!-- 単語詳細モーダル -->
-    <div id="word-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 p-4">
-        <div class="bg-white rounded-2xl p-5 max-w-sm w-full shadow-2xl border-2 md:border-4 border-amber-300 transform scale-95 transition-transform duration-300" id="modal-card">
-            <div class="flex justify-between items-start mb-2">
-                <div id="modal-sound-type" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold">
-                    音素カテゴリ
-                </div>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 bg-slate-100 p-1 rounded-full transition-colors">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-            
-            <div class="text-center py-4">
-                <div id="modal-emoji" class="text-8xl mb-3 select-none drop-shadow">❓</div>
-                <h2 id="modal-name" class="text-3xl font-extrabold text-slate-800 mb-1">詞彙名稱</h2>
-            </div>
-
-            <div class="mt-4 flex gap-2">
-                <button onclick="closeModal()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl text-sm shadow transition-all">
-                    確定
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- ゲームロジック -->
     <script>
         // 音素リスト
         // /t-/ 塞音（不送気音）
         const tSounds = [
-            { emoji: '😎', name: '型仔 (帥氣)' },
+            { emoji: '😎', name: '戴黑超' },
             { emoji: '🐬', name: '海豚' },
             { emoji: '🦋', name: '蝴蝶' },
-            { emoji: '🧘‍♀️', name: '做瑜伽 (女人)' },
-            { emoji: '🧘‍♂️', name: '做瑜伽 (男人)' },
+            { emoji: '🧘‍♀️', name: '打坐' },
+            { emoji: '🧘‍♂️', name: '打坐' },
             { emoji: '🧘', name: '打坐' },
             { emoji: '🏌️‍♀️', name: '打高爾夫球' },
             { emoji: '⛹️‍♂️', name: '打籃球' },
-            { emoji: '🤸', name: '打側手翻' },
+            { emoji: '🤸', name: '打側手翻/打關斗' },
             { emoji: '🩲', name: '底褲' },
             { emoji: '👜', name: '手袋' },
-            { emoji: '🛍️', name: '買嘢袋' },
+            { emoji: '🛍️', name: '購物袋' },
             { emoji: '🥇', name: '第一名' },
-            { emoji: '📢', name: '大喇叭' },
+            { emoji: '📢', name: '大喇叭/大聲公' },
             { emoji: '🎮', name: '打機' },
             { emoji: '🥁', name: '打鼓' },
-            { emoji: '🔪', name: '單刀 / 單刀直入' },
+            { emoji: '🔪', name: '刀' },
             { emoji: '💣', name: '炸彈' },
             { emoji: '☎️', name: '電話' },
             { emoji: '📱', name: '電話' },
             { emoji: '💻', name: '電腦' },
             { emoji: '💿', name: '光碟' },
             { emoji: '📺', name: '電視' },
-            { emoji: '🔍', name: '放大鏡 (睇)' },
-            { emoji: '🔦', name: '電筒' },
-            { emoji: '💡', name: '電燈' },
+            { emoji: '🔍', name: '放大鏡' },
+            { emoji: '🔦', name: '手電筒' },
+            { emoji: '💡', name: '燈膽' },
             { emoji: '📌', name: '圖釘' },
             { emoji: '✂️', name: '剪刀' },
             { emoji: '🍳', name: '煎蛋' },
             { emoji: '🥚', name: '雞蛋' },
             { emoji: '🍝', name: '意大利粉' },
             { emoji: '🎂', name: '蛋糕' },
-            { emoji: '🍰', name: '切蛋糕' },
-            { emoji: '🧁', name: '杯子蛋糕' },
+            { emoji: '🍰', name: '蛋糕' },
+            { emoji: '🧁', name: '迷你蛋糕' },
             { emoji: '🫗', name: '倒水' },
             { emoji: '🍴', name: '刀叉' },
             { emoji: '🍓', name: '士多啤梨' },
             { emoji: '🚲', name: '單車' },
-            { emoji: '🚦', name: '交通燈' },
+            { emoji: '🚦', name: '交通燈/紅綠燈' },
             { emoji: '🗺️', name: '地圖' },
             { emoji: '⚡', name: '閃電' }
         ];
 
         // /th-/ 塞音（送気音）
         const thSounds = [
-            { emoji: '🌻', name: '向日葵 (太陽花)' },
+            { emoji: '🌻', name: '太陽花' },
             { emoji: '👩‍🚀', name: '太空人' },
             { emoji: '💃', name: '跳舞' },
             { emoji: '🕺', name: '跳舞' },
@@ -187,14 +162,14 @@
             { emoji: '🕶️', name: '太陽眼鏡' },
             { emoji: '🩴', name: '拖鞋' },
             { emoji: '🎶', name: '聽歌' },
-            { emoji: '🪜', name: '長梯' },
+            { emoji: '🪜', name: '梯' },
             { emoji: '🗑️', name: '垃圾桶' },
             { emoji: '🍬', name: '糖果' },
-            { emoji: '🍭', name: '波子糖' },
-            { emoji: '🍯', name: '蜂蜜 (甜)' },
+            { emoji: '🍭', name: '波板糖' },
+            { emoji: '🍯', name: '蜜糖' },
             { emoji: '🍇', name: '提子' },
             { emoji: '🧄', name: '蒜頭' },
-            { emoji: '🛸', name: '飛碟 (太空船)' },
+            { emoji: '🛸', name: '太空船' },
             { emoji: '🚤', name: '快艇' },
             { emoji: '🧯', name: '滅火筒' }
         ];
@@ -208,13 +183,13 @@
             { emoji: '🐭', name: '老鼠' },
             { emoji: '🐸', name: '青蛙' },
             { emoji: '🐻‍❄️', name: '北極熊' },
-            { emoji: '🐔', name: '小雞' },
-            { emoji: '🐁', name: '小白鼠' },
-            { emoji: '🐍', name: '一條蛇' },
+            { emoji: '🐔', name: '雞' },
+            { emoji: '🐁', name: '老鼠' },
+            { emoji: '🐍', name: '蛇' },
             { emoji: '🐳', name: '大鯨魚' },
             { emoji: '🏇', name: '騎馬' },
             { emoji: '👑', name: '皇冠' },
-            { emoji: '💄', name: '口紅' },
+            { emoji: '💄', name: '唇膏' },
             { emoji: '⚽', name: '足球' },
             { emoji: '🏀', name: '籃球' },
             { emoji: '🏸', name: '羽毛球' },
@@ -222,7 +197,7 @@
             { emoji: '🍦', name: '雪糕' },
             { emoji: '🌶️', name: '辣椒' },
             { emoji: '✈️', name: '飛機' },
-            { emoji: '💬', name: '對話框' }
+            { emoji: '💬', name: '說話' }
         ];
 
         // Web Audioシンセサイザー（効果音用）
@@ -273,9 +248,11 @@
         // ゲーム状態
         let currentMode = 'easy'; // デフォルトは容易模式（9格）
         let gameState = [];       // 各スロットの状態を保持する配列
+        let isAllRevealing = false; // 全開処理中かどうかのフラグ
 
         // モード変更の設定
         function setMode(mode) {
+            if (isAllRevealing) return; // 全開中のモード変更を防止
             playSound('click');
             currentMode = mode;
             
@@ -302,7 +279,6 @@
             
             let targetCount = minTargets;
             if (mode === 'easy') {
-                // 9マスの場合は目標割合を6か7にランダム決定
                 targetCount = Math.random() < 0.5 ? 6 : 7;
             }
 
@@ -330,8 +306,7 @@
                 name: item.name,
                 type: item.type,
                 revealed: false,
-                rolling: false,
-                badgeRevealed: false // ターゲットの声母名を表示したかどうかを追跡
+                rolling: false
             }));
         }
 
@@ -350,39 +325,24 @@
                 const card = document.createElement('div');
                 
                 if (slot.revealed) {
-                    let bgCol = "bg-white";
-                    let badgeHTML = "";
-
-                    // 声母バッジがタップされて開封された場合、対応する種類を表示
-                    if (slot.badgeRevealed) {
-                        if (slot.type === 't') {
-                            bgCol = "bg-rose-50 border-rose-300 hover:border-rose-400";
-                            badgeHTML = `<span class="absolute top-1 right-1 text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-rose-200 text-rose-800 shadow-sm border border-rose-300 select-none">/t-/ 打</span>`;
-                        } else if (slot.type === 'th') {
-                            bgCol = "bg-sky-50 border-sky-300 hover:border-sky-400";
-                            badgeHTML = `<span class="absolute top-1 right-1 text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-sky-200 text-sky-800 shadow-sm border border-sky-300 select-none">/th-/ 他</span>`;
-                        } else {
-                            bgCol = "bg-slate-50 border-slate-300 hover:border-slate-400";
-                            badgeHTML = `<span class="absolute top-1 right-1 text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-800 shadow-sm border border-slate-300 select-none">其他</span>`;
-                        }
-                    } else {
-                        // 未開封状態の声母バッジ（タップして表示）
-                        bgCol = "bg-amber-50/20 border-amber-200/80 hover:border-amber-300";
-                        badgeHTML = `<button onclick="revealBadge(event, ${index})" class="absolute top-1 right-1 text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100/80 text-amber-700 shadow-sm border border-amber-200 hover:bg-amber-200/90 transition-all select-none z-10">❓ 聲母</button>`;
+                    // ターゲット音かどうかによってマイルドな背景色を設定（バッジ表示はなし、セラピストの判断サポート用）
+                    let bgCol = "bg-white border-amber-200";
+                    if (slot.type === 't') {
+                        bgCol = "bg-rose-50/70 border-rose-200";
+                    } else if (slot.type === 'th') {
+                        bgCol = "bg-sky-50/70 border-sky-200";
                     }
 
-                    // グリッドサイズにあわせて絵文字サイズを切り替え
                     const emojiSizeClass = currentMode === 'easy' ? 'text-5xl sm:text-6xl md:text-7xl' : 'text-6xl sm:text-7xl md:text-8xl';
 
-                    card.className = `relative flex flex-col items-center justify-center aspect-square rounded-xl md:rounded-2xl cursor-pointer transition-all duration-300 shadow-sm border-2 md:border-4 ${bgCol} scale-100 hover:scale-[1.02] hover:shadow-md w-full p-2`;
+                    // 完全に展開されたカードは学生の余計な入力を防ぐため、クリック不可（ポインター、ホバー、モーダルを排除）
+                    card.className = `relative flex flex-col items-center justify-center aspect-square rounded-xl md:rounded-2xl border-2 md:border-4 ${bgCol} shadow-sm w-full p-2 cursor-default select-none`;
                     
                     card.innerHTML = `
-                        ${badgeHTML}
-                        <div class="${emojiSizeClass} emoji-pop select-none drop-shadow-md">${slot.emoji}</div>
+                        <div class="${emojiSizeClass} emoji-pop drop-shadow-sm">${slot.emoji}</div>
                     `;
-                    card.onclick = () => openModal(slot);
                 } else if (slot.rolling) {
-                    card.className = "flex flex-col items-center justify-center aspect-square rounded-xl md:rounded-2xl bg-amber-50 border-2 md:border-4 border-amber-400/80 roll-anim shadow-inner w-full p-2";
+                    card.className = "flex flex-col items-center justify-center aspect-square rounded-xl md:rounded-2xl bg-amber-50 border-2 md:border-4 border-amber-400/80 roll-anim shadow-inner w-full p-2 select-none";
                     
                     const rollEmojiSize = currentMode === 'easy' ? 'text-2xl sm:text-4xl' : 'text-3xl sm:text-5xl';
                     card.innerHTML = `
@@ -390,7 +350,7 @@
                         <span class="text-[8px] sm:text-[10px] text-amber-500 font-bold mt-1">旋轉...</span>
                     `;
                 } else {
-                    card.className = "group flex flex-col items-center justify-center aspect-square rounded-xl md:rounded-2xl bg-white hover:bg-amber-50/50 border-2 md:border-4 border-amber-200/60 hover:border-amber-400 cursor-pointer transition-all duration-300 wiggle-hover shadow-sm active:scale-95 w-full p-2";
+                    card.className = "group flex flex-col items-center justify-center aspect-square rounded-xl md:rounded-2xl bg-white hover:bg-amber-50/50 border-2 md:border-4 border-amber-200/60 hover:border-amber-400 cursor-pointer transition-all duration-300 wiggle-hover shadow-sm active:scale-95 w-full p-2 select-none";
                     
                     const numSize = currentMode === 'easy' ? 'w-8 h-8 sm:w-12 sm:h-12 text-sm sm:text-xl' : 'w-10 h-10 sm:w-14 sm:h-14 text-xl sm:text-2xl';
                     card.innerHTML = `
@@ -407,93 +367,66 @@
             lucide.createIcons();
         }
 
-        // 「❓ 聲母」バッジをタップして声母を公開
-        function revealBadge(event, index) {
-            event.stopPropagation(); // 詳細モーダルのポップアップ防止
-            if (!gameState[index].badgeRevealed) {
-                gameState[index].badgeRevealed = true;
-                playSound('reveal');
-                renderSlots();
-            }
-        }
-
-        // スロットクリック時の回転アニメーションと効果音制御
+        // スロットクリック時の回転アニメーション処理（非同期化して1個ずつの順次回転にも対応可能に設計）
         function rollSlot(index) {
-            if (gameState[index].revealed || gameState[index].rolling) return;
-
-            gameState[index].rolling = true;
-            renderSlots();
-
-            let rolls = 0;
-            const rollInterval = setInterval(() => {
-                playSound('roll');
-                rolls++;
-                if (rolls >= 4) {
-                    clearInterval(rollInterval);
-                    gameState[index].rolling = false;
-                    gameState[index].revealed = true;
-                    playSound('reveal');
-                    renderSlots();
+            return new Promise((resolve) => {
+                if (gameState[index].revealed || gameState[index].rolling) {
+                    resolve();
+                    return;
                 }
-            }, 100);
-        }
 
-        // 全てのスロットを順番に公開
-        function revealAll() {
-            let delay = 0;
-            gameState.forEach((slot, index) => {
-                if (!slot.revealed && !slot.rolling) {
-                    setTimeout(() => {
+                gameState[index].rolling = true;
+                renderSlots();
+
+                let rolls = 0;
+                const rollInterval = setInterval(() => {
+                    playSound('roll');
+                    rolls++;
+                    if (rolls >= 4) {
+                        clearInterval(rollInterval);
+                        gameState[index].rolling = false;
                         gameState[index].revealed = true;
                         playSound('reveal');
                         renderSlots();
-                    }, delay);
-                    delay += 200;
-                }
+                        resolve();
+                    }
+                }, 100);
             });
+        }
+
+        // 全てのスロットを順番に1個ずつロールアニメーションを伴って公開（全開モード）
+        async function revealAll() {
+            if (isAllRevealing) return;
+            isAllRevealing = true;
+
+            // コントロールボタンの一時無効化処理
+            const btnRevealAll = document.getElementById('btn-reveal-all');
+            if (btnRevealAll) {
+                btnRevealAll.disabled = true;
+                btnRevealAll.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+
+            for (let i = 0; i < gameState.length; i++) {
+                if (!gameState[i].revealed && !gameState[i].rolling) {
+                    await rollSlot(i);
+                    // 次の回転スロット開始までの間にマイルドな待機時間を追加
+                    await new Promise(r => setTimeout(r, 120));
+                }
+            }
+
+            isAllRevealing = false;
+            if (btnRevealAll) {
+                btnRevealAll.disabled = false;
+                btnRevealAll.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         }
 
         // ゲームのリセット
         function resetGame() {
+            if (isAllRevealing) return; // ロール進行中はリセット不可
             playSound('click');
             gameState = generateSlotsData(currentMode);
             renderSlots();
-        }
-
-        // 詳細モーダル表示 (発音引導、音声合成はなし、ワード名称のみ)
-        function openModal(slot) {
-            const modal = document.getElementById('word-modal');
-            const card = document.getElementById('modal-card');
-            const soundType = document.getElementById('modal-sound-type');
-
-            document.getElementById('modal-emoji').innerText = slot.emoji;
-            document.getElementById('modal-name').innerText = slot.name;
-
-            if (slot.type === 't') {
-                soundType.innerText = '/t-/ 不送氣打音 🎯';
-                soundType.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200";
-            } else if (slot.type === 'th') {
-                soundType.innerText = '/th-/ 送氣他音 💨';
-                soundType.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200";
-            } else {
-                soundType.innerText = '輔助連結詞 🧩';
-                soundType.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200";
-            }
-
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            card.classList.remove('scale-95');
-            card.classList.add('scale-100');
-            playSound('click');
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('word-modal');
-            const card = document.getElementById('modal-card');
-            
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            card.classList.remove('scale-100');
-            card.classList.add('scale-95');
-            playSound('click');
         }
 
         // アプリ起動時の初期セットアップ
